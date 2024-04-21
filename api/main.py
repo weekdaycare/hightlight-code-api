@@ -26,6 +26,8 @@ def vOneGenerate(response: Response,code: str = "",url: str = "",lang: str = "py
     if url != "":
         filename = url.split('/')[-1]
         code = requests.get(url).text
+        code = code.replace('\\', '\\\\')
+
         
     lexer = get_lexer_by_name(lang)
     # 使用HTML formatter进行格式化
@@ -41,6 +43,7 @@ def vOneGenerate(response: Response,code: str = "",url: str = "",lang: str = "py
     output = 'document.write(\''+ result + '\') '
     if withcss:
         output = output + '''\ndocument.write('<link rel="stylesheet" href="https://jsd.hzchu.top/gh/thun888/asstes@master/files/pygments-css/default.css">')'''
+    # 进行html转义
     return output
 
 if __name__ == "__main__":
