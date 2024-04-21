@@ -26,6 +26,7 @@ def vOneGenerate(response: Response,code: str = "",url: str = "",lang: str = "py
     if url != "":
         filename = url.split('/')[-1]
         code = requests.get(url).text
+        # 进行转义
         code = code.replace('\\', '\\\\')
 
         
@@ -43,7 +44,6 @@ def vOneGenerate(response: Response,code: str = "",url: str = "",lang: str = "py
     output = 'document.write(\''+ result + '\') '
     if withcss:
         output = output + '''\ndocument.write('<link rel="stylesheet" href="https://jsd.hzchu.top/gh/thun888/asstes@master/files/pygments-css/default.css">')'''
-    # 进行html转义
     return output
 
 if __name__ == "__main__":
