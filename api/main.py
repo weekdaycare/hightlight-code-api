@@ -11,15 +11,10 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 app = FastAPI(docs_url=None, redoc_url=None)
 
-origins = [
-    "",
-    "blog.hzchu.top",
-    "hzchu.top",
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,7 +41,6 @@ def vOneGenerate(response: Response,code: str = "",url: str = "",lang: str = "py
     output = 'document.write(\''+ result + '\') '
     if withcss:
         output = output + '''\ndocument.write('<link rel="stylesheet" href="https://jsd.hzchu.top/gh/thun888/asstes@master/files/pygments-css/default.css">')'''
-    response.headers["Vercel-CDN-Cache-Control"] = "max-age=3600"
     return output
 
 if __name__ == "__main__":
