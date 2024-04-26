@@ -46,6 +46,7 @@ def vOneGenerate(code: str = "", url: str = "", lang: str = "", withcss: bool = 
     result = result.replace('\n', '<br>')  # 保持换行符的 HTML 表示
     pattern = re.compile(r'<td class="linenos">.*?</td>', re.DOTALL) # 去掉行号
     result = pattern.sub('', result)
+    result = re.sub(r'(<td class="code">)(.*?)(</td>)', r'\1\2<div class="copy-btn">Copy</div>\3', result, flags=re.DOTALL) # 添加 copy 按钮
     result = result.replace('<div class="highlight">', '<div class="highlight ' + lexer.name.lower() + '"><figcaption><span>' + filename + '</span></figcaption>')
 
     # 包装结果为 JSON 格式
