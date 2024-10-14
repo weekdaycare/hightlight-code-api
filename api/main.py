@@ -3,7 +3,7 @@
 import requests
 import uvicorn
 import re
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -20,8 +20,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def extract_lines(code: str, lines_param: str):
+    lines = code.splitlines()
+    
+    # 尝试解析行号，移除 'L' 并转换为整数
+    try:
+        line_numbers = [int(num[1:]) for num in lines_param.split('-')]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid line number format.")
+    
+    # 确保行号在有效范围内并支持反向范围
+    line_numbers = sorted(min(num, len(lines)) for num in line_numbers)
+
+    if len(line_numbers) == 1:
+        return lines[line_numbers[0] - 1]
+    elif len(line_numbers) == 2:
+        return '\n'.join(lines[line_numbers[0] - 1:line_numbers[1]])
+    else:
+        raise HTTPException(status_code=400, detail="Invalid line number input.")
+
 @app.get("/api/v1/generate")
-def vOneGenerate(code: str = "", url: str = "", lang: str = "", withcss: bool = ""):
+def vOneGenerate(url: str, lang: str = "", withcss: bool = False, lines: str = Query(None)):
     filename = 'InputCode'
     if url:
         try:
@@ -31,7 +50,14 @@ def vOneGenerate(code: str = "", url: str = "", lang: str = "", withcss: bool = 
             code = code.replace('\\', '\\\\')  # 进行转义
             filename = url.split('/')[-1]
         except requests.RequestException as e:
-            raise HTTPException(status_code=400, detail=str(e)) # 如果请求失败，返回错误信息
+            # 如果请求失败，返回错误信息
+            raise HTTPException(status_code=400, detail=str(e))
+
+    if lines:
+        try:
+            code = extract_lines(code, lines)
+        except HTTPException as e:
+            return e
 
     try:
         if lang:
@@ -46,7 +72,6 @@ def vOneGenerate(code: str = "", url: str = "", lang: str = "", withcss: bool = 
     result = result.replace('\n', '<br>')  # 保持换行符的 HTML 表示
     pattern = re.compile(r'<td class="linenos">.*?</td>', re.DOTALL) # 去掉行号
     result = pattern.sub('', result)
-    result = re.sub(r'(<td class="code">)(.*?)(</td>)', r'\1\2<div class="copy-btn">Copy</div>\3', result, flags=re.DOTALL) # 添加 copy 按钮
     result = result.replace('<div class="highlight">', '<div class="highlight ' + lexer.name.lower() + '"><figcaption><span>' + filename + '</span></figcaption>')
 
     # 包装结果为 JSON 格式
