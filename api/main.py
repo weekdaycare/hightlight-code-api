@@ -69,7 +69,7 @@ def vOneGenerate(url: str, lang: str = "", withcss: bool = False, lines: str = Q
 
     formatter = HtmlFormatter(linenos=True)
     result = highlight(code, lexer, formatter)
-    result = result.replace('\n', '<br>')  # 保持换行符的 HTML 表示
+    result = result[:-2].replace('\n', '<br>')[:-4]  # 换行符的 HTML 表示，只去掉末尾的一个<br>
     pattern = re.compile(r'<td class="linenos">.*?</td>', re.DOTALL) # 去掉行号
     result = pattern.sub('', result)
     result = re.sub(r'(<td class="code">)(.*?)(</td>)', r'\1\2<div class="copy-btn">Copy</div>\3', result, flags=re.DOTALL) # 添加 copy 按钮
