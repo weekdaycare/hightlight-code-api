@@ -47,7 +47,6 @@ def vOneGenerate(url: str, lang: str = "", withcss: bool = False, lines: str = Q
             response = requests.get(url)
             response.raise_for_status()  # 确保请求成功
             code = response.text
-            code = code.replace('\\', '\\\\')  # 进行转义
             filename = url.split('/')[-1]
         except requests.RequestException as e:
             # 如果请求失败，返回错误信息
